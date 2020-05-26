@@ -2,17 +2,17 @@ import {Injectable, OnDestroy, Scope} from "@tsed/common";
 import {PushNotificationToken} from "../models/PushNotificationToken";
 
 const firebaseAdmin = require("firebase-admin");
-const firebaseServiceAccount = require("../config/serviceAccountKey.json");
+// const firebaseServiceAccount = require("../config/serviceAccountKey.json");
 
 @Injectable()
 @Scope('request')
 export class NotificationService implements OnDestroy {
 
     constructor() {
-        firebaseAdmin.initializeApp({
+        /*firebaseAdmin.initializeApp({
             credential: firebaseAdmin.credential.cert(firebaseServiceAccount),
             databaseURL: "https://app-parceros.firebaseio.com"
-        });
+        });*/
     }
 
     public sendNotificationToUser(message: string) {
