@@ -7,7 +7,7 @@ deploy:
   provider: heroku
   api_key:
     secure: i6WCDfiIk2/t5oqXJ8R1kzd3tLIZ/cKB15qWSn4uHGAG3HRTdjgN8jpd/76sUIajcrFtlObYOIWSXZs6YZfnNj87OBIT4SAze7dibC9MKQm24w9HFUvG9dv6nMQsJcQdsy4PXNKWTnb5xAa2wGqgIfUVR81nRuT9mg32zuWL9xJflCNMKK3GnlG8JYXLjkmIO3sndMvK8ffsR2WwWfhnWbJlj1U2r36reK+qWfKjmdLWlTqp20q3/Q8HehSQrShSkul+6gCM9sHgASueZ/VB5+e+IqAgBDMgfHH3Ti605jBM4AwYw4aQyiJQVyi4d3grXep33Ssfhxb0IasJumJgbos7r8GbGsKogYt5bH5m5lgFo3E6K4JCrRC0qULELab+9kR/RQg5Bhl7pCnAGe5dbz/97c6PllK2RaoDQOTxomXu7Nh5s6ybcOraBMQKJmBTfzH1gVjJ1RpUskNqoOU/jV2DQx5B4TI7lkAKSaIgfRyf3d5ouEY+dRujdczea3sLs7UF8DCOhmM6gdL+jimWnHvhThVvGHAxAqeOjs4hTe/SUPc1qBbaO04V+6k3Ox7yj8mJEaLsQ2CtPIXuSqQfmg+qC/ZGvg/gZ+2Qqq74Bj6Z35xKD0xVPV9Di09cmCsY82mfaqJHUqsGD3RbBuMyBQbjbCroqQ6OEYIiWfMNVuk=
-  app: partner-platform
+  app: partner-platform-dev
   on:
     repo: app-parceros/partner-platform
   skip_cleanup: 'true'
