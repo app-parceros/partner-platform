@@ -9,6 +9,7 @@ export class Server extends ServerLoader {
         const cookieParser = require('cookie-parser'),
             bodyParser = require('body-parser'),
             compress = require('compression'),
+            cors = require("cors"),
             methodOverride = require('method-override');
 
         this
@@ -16,6 +17,7 @@ export class Server extends ServerLoader {
             .use(cookieParser())
             .use(compress({}))
             .use(methodOverride())
+            .use(cors())
             .use(bodyParser.json())
             .use(bodyParser.urlencoded({
                 extended: true

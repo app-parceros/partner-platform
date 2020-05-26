@@ -1,5 +1,6 @@
 import {Controller, Get, Post} from "@tsed/common";
 import {NotificationService} from "../../partner-platform/services/NotificationService";
+import {PushNotificationToken} from "../../partner-platform/models/PushNotificationToken";
 
 @Controller("/notification")
 export class NotificationController {
@@ -8,11 +9,17 @@ export class NotificationController {
 
     }
 
-
     @Post("/")
     async sendNotificationToUser(request: Express.Request, response: Express.Response) {
 
         await this._notificationService.sendNotificationToUser("my message");
+        return {};
+    }
+
+    @Post("/token")
+    async RegistrationToken(request: Express.Request, response: Express.Response) {
+        const notificationToken: PushNotificationToken = request['body'];
+        await this._notificationService.registerToken(notificationToken);
         return {};
     }
 }
