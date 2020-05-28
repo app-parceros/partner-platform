@@ -2,28 +2,28 @@ import {Injectable, OnDestroy, Scope} from "@tsed/common";
 import {PushNotificationToken} from "../models/PushNotificationToken";
 
 const firebaseAdmin = require("firebase-admin");
-// const firebaseServiceAccount = require("../config/serviceAccountKey.json");
+import {configuration} from "../config/serviceAccountKey";
 
 @Injectable()
 @Scope('request')
 export class NotificationService implements OnDestroy {
 
     constructor() {
-        /*firebaseAdmin.initializeApp({
-            credential: firebaseAdmin.credential.cert(firebaseServiceAccount),
-            databaseURL: "https://app-parceros.firebaseio.com"
-        });*/
+        firebaseAdmin.initializeApp({
+            credential: firebaseAdmin.credential.cert(configuration),
+            databaseURL: configuration.database_url
+        });
     }
 
-    public sendNotificationToUser(message: string) {
+    public sendNotificationToUser(registrationToken: string, message: string) {
         console.log("sending message", message);
         const payload = {
             notification: {
                 title: "This is a Notification",
-                body: "This is the body of the notification message."
+                body: message
             }
         };
-        const registrationToken = "<registration token goes here>";
+
 
         const options = {
             priority: "high",
@@ -44,6 +44,7 @@ export class NotificationService implements OnDestroy {
 
     async registerToken(pushNotificationToken: PushNotificationToken) {
         console.log('token', pushNotificationToken.value);
+        this.sendNotificationToUser(pushNotificationToken.value, "Te has registrado")
     }
 
     $onDestroy() {

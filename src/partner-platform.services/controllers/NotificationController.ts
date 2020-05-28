@@ -11,8 +11,8 @@ export class NotificationController {
 
     @Post("/")
     async sendNotificationToUser(request: Express.Request, response: Express.Response) {
-
-        await this._notificationService.sendNotificationToUser("my message");
+        const notificationToken: PushNotificationToken = request['body'];
+        await this._notificationService.sendNotificationToUser(notificationToken.value, "my message");
         return {};
     }
 
