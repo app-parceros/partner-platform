@@ -10,8 +10,8 @@ export class NotificationController {
     @Get("/")
     async getFavors(request: Express.Request, response: Express.Response) {
 
-        await this._favorService.getFavors();
-        return {};
+        const favorsResultSet = await this._favorService.getFavors();
+        return favorsResultSet;
     }
 
 }
