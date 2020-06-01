@@ -12,6 +12,7 @@ export const configuration: any = {
     auth_provider_x509_cert_url: process.env.partner_platform_notification__auth_provider_x509_cert_url,
     client_x509_cert_url: process.env.partner_platform_notification__client_x509_cert_url,
     database_url: process.env.partner_platform_notification__database_url,
+    maps_api_key: process.env.partner_platform_notification__maps_api_key
 }
 
 

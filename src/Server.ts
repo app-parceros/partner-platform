@@ -1,4 +1,7 @@
 import {GlobalAcceptMimesMiddleware, Module, ServerLoader} from "@tsed/common";
+import * as http from "http";
+import {configuration} from "./partner-platform/config/serviceAccountKey";
+
 
 @Module({})
 export class Server extends ServerLoader {
@@ -11,8 +14,8 @@ export class Server extends ServerLoader {
             bodyParser = require('body-parser'),
             //compress = require('compression'),
             cors = require("cors"),
-            methodOverride = require('method-override');
-
+            methodOverride = require('method-override'),
+            {createProxyMiddleware} = require('http-proxy-middleware');
 
         const corsOptions = {
             origin: function (origin, callback) {
@@ -28,6 +31,17 @@ export class Server extends ServerLoader {
             // .use(methodOverride())
             .use(cors(corsOptions))
             .use(bodyParser.json())
+            .use(
+                '/maps',
+                createProxyMiddleware({
+                        target: 'https://maps.googleapis.com',
+                        changeOrigin: true,
+                        onProxyReq: function (proxyReq: http.ClientRequest, req: Request, res: Response) {
+                            proxyReq.path = `${proxyReq.path}&key=${configuration.maps_api_key}`
+                        }
+                    }
+                )
+            )
             .use(bodyParser.urlencoded({
                 extended: true
             }));
