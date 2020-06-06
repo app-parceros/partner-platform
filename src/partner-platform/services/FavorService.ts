@@ -2,6 +2,7 @@ import {Injectable, OnDestroy, Scope} from "@tsed/common";
 import {ResultSet} from "../models/ResultSet";
 import {IFavor} from "../models/Favor";
 import {FavorPersistence} from "../persistence/FavorPersistence";
+import {IPosition} from "../models/Location";
 
 @Injectable()
 @Scope('request')
@@ -60,6 +61,25 @@ export class FavorService implements OnDestroy {
 
     public async createFavor(favor: IFavor) {
         await this._favorPersistence.savePosition(favor.location);
+    }
+
+    public async getNearestFavors(position: IPosition, radius: number) {
+
+        const resultSet = {
+            pageNumber: 1,
+            pageSize: 6,
+            totalPages: 4,
+            totalRecords: 9,
+            content: []
+        }
+        if (!position.lat || !position.lng) {
+            return resultSet
+        }
+        resultSet.content = await this._favorPersistence.getNearestItems(
+            position,
+            radius
+        );
+        return resultSet;
     }
 
 

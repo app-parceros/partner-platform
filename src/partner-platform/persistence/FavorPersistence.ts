@@ -1,12 +1,11 @@
 import {Injectable, OnDestroy, Scope} from "@tsed/common";
 import {v4 as uuid} from 'uuid';
+import {configuration} from "../config/AWSConfig";
+import {ILocation, IPosition} from "../models/Location";
+import {PutPointInput} from "dynamodb-geo/dist/types";
 
 const ddbGeo = require('dynamodb-geo');
 const AWS = require('aws-sdk');
-import {configuration} from "../config/AWSConfig";
-import {IFavor} from "../models/Favor";
-import {ILocation} from "../models/Location";
-import {PutPointInput} from "dynamodb-geo/dist/types";
 
 @Injectable()
 @Scope('request')
@@ -69,7 +68,9 @@ export class FavorPersistence implements OnDestroy {
             PutItemInput: {
                 Item: {
                     name: {S: location.name},
-                    address: {S: location.address}
+                    address: {S: location.address},
+                    ivan: {S: 'van'},
+                    other: {S: 'van'},
                 }
             }
         };
@@ -77,6 +78,17 @@ export class FavorPersistence implements OnDestroy {
             .putPoint(pointInput)
             //.batchWritePoints([pointInput])
             .promise()
+    }
+
+    async getNearestItems(position: IPosition, radius: number = 1000) {
+        console.log('*********** getNearestItems');
+        return await this.geoTableManager.queryRadius({
+            RadiusInMeter: radius,
+            CenterPoint: {
+                latitude: position.lat,
+                longitude: position.lng
+            }
+        });
     }
 
 

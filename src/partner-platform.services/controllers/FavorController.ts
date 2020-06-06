@@ -1,7 +1,7 @@
-import {Controller, Get, Post} from "@tsed/common";
+import {Controller, Get, Post, QueryParams} from "@tsed/common";
 import {FavorService} from "../../partner-platform/services/FavorService";
-import {PushNotificationToken} from "../../partner-platform/models/PushNotificationToken";
 import {IFavor} from "../../partner-platform/models/Favor";
+import {ResultSet} from "../../partner-platform/models/ResultSet";
 
 @Controller("/favor")
 export class NotificationController {
@@ -10,10 +10,15 @@ export class NotificationController {
     }
 
     @Get("/")
-    async getFavors(request: Express.Request, response: Express.Response) {
-
-        const favorsResultSet = await this._favorService.getFavors();
-        return favorsResultSet;
+    async getNearestFavors(
+        @QueryParams("lat") lat: number = 4.7152837, //Todo: define default values
+        @QueryParams("lng") lng: number = -74.0182495, //Todo: define default values
+        @QueryParams("radius") radius: number = 1000): Promise<ResultSet<any>> {
+        return await this._favorService.getNearestFavors(
+            {
+                lat: lat,
+                lng: lng
+            }, radius);
     }
 
     @Post("/")
