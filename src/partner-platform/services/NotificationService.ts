@@ -2,7 +2,7 @@ import {Injectable, OnDestroy, Scope} from "@tsed/common";
 import {PushNotificationToken} from "../models/PushNotificationToken";
 
 const firebaseAdmin = require("firebase-admin");
-import {configuration} from "../config/serviceAccountKey";
+import {configuration} from "../config/FirebaseConfig";
 
 @Injectable()
 @Scope('request')

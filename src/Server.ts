@@ -1,6 +1,6 @@
 import {GlobalAcceptMimesMiddleware, Module, ServerLoader} from "@tsed/common";
 import * as http from "http";
-import {configuration} from "./partner-platform/config/serviceAccountKey";
+import {configuration} from "./partner-platform/config/FirebaseConfig";
 
 
 @Module({})
