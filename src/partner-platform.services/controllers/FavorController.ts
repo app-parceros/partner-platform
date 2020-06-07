@@ -11,8 +11,8 @@ export class NotificationController {
 
     @Get("/")
     async getNearestFavors(
-        @QueryParams("lat") lat: number = 4.7152837, //Todo: define default values
-        @QueryParams("lng") lng: number = -74.0182495, //Todo: define default values
+        @QueryParams("lat") lat: number /*= 4.7152837*/,
+        @QueryParams("lng") lng: number /*= -74.0182495*/,
         @QueryParams("radius") radius: number = 1000): Promise<ResultSet<any>> {
         return await this._favorService.getNearestFavors(
             {
@@ -24,8 +24,7 @@ export class NotificationController {
     @Post("/")
     async createFavor(request: Express.Request, response: Express.Response) {
         const favor: IFavor = request['body'];
-        const favorsResult = await this._favorService.createFavor(favor);
-        return favorsResult;
+        return await this._favorService.createFavor(favor);
     }
 
 }

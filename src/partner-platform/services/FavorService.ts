@@ -1,70 +1,23 @@
 import {Injectable, OnDestroy, Scope} from "@tsed/common";
-import {ResultSet} from "../models/ResultSet";
 import {IFavor} from "../models/Favor";
-import {FavorPersistence} from "../persistence/FavorPersistence";
+import {GeoHashPersistence} from "../persistence/GeoHashPersistence";
 import {IPosition} from "../models/Location";
+import {ResultSet} from "../models/ResultSet";
 
 @Injectable()
 @Scope('request')
 export class FavorService implements OnDestroy {
+    private readonly _geoHashPersistence: GeoHashPersistence;
 
-    constructor(private readonly _favorPersistence: FavorPersistence) {
-    }
-
-    public getFavors(): ResultSet<IFavor> {
-        const result: ResultSet<IFavor> = {
-            pageNumber: 1,
-            pageSize: 6,
-            totalPages: 4,
-            totalRecords: 9,
-            content: [
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f00",
-                    description: " Este es un favor nuevo 0",
-                    name: "Nuevo martillo 0",
-                    location: null
-                },
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f11",
-                    description: " Este es un favor nuevo 1",
-                    name: "Nuevo martillo 1",
-                    location: null
-                },
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f22",
-                    description: " Este es un favor nuevo 2",
-                    name: "Nuevo martillo 2",
-                    location: null
-                },
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f33",
-                    description: " Este es un favor nuevo 3",
-                    name: "Nuevo martillo 3",
-                    location: null
-                },
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f44",
-                    description: " Este es un favor nuevo 4",
-                    name: "Nuevo martillo 4",
-                    location: null
-                },
-                {
-                    id: "fe4202b0-9ee4-4710-ae36-faa928953f55",
-                    description: " Este es un favor nuevo 5",
-                    name: "Nuevo martillo 5",
-                    location: null
-                }
-            ]
-        }
-        return result;
+    constructor() {
+        this._geoHashPersistence = new GeoHashPersistence('Favor');
     }
 
     public async createFavor(favor: IFavor) {
-        await this._favorPersistence.savePosition(favor.location);
+        await this._geoHashPersistence.saveRegister<IFavor>(favor.location.position, favor);
     }
 
-    public async getNearestFavors(position: IPosition, radius: number) {
-
+    public async getNearestFavors(position: IPosition, radius: number): Promise<ResultSet<IFavor>> {
         const resultSet = {
             pageNumber: 1,
             pageSize: 6,
@@ -75,7 +28,7 @@ export class FavorService implements OnDestroy {
         if (!position.lat || !position.lng) {
             return resultSet
         }
-        resultSet.content = await this._favorPersistence.getNearestItems(
+        resultSet.content = await this._geoHashPersistence.getNearestRegisters<IFavor>(
             position,
             radius
         );

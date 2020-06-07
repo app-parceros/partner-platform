@@ -3,14 +3,13 @@ import {Guid} from "./Guid";
 import {ILocation} from "./Location";
 import {IFavorStep} from "./FavorStep";
 
-export interface IFavor {
+export interface IUser {
     id: Guid;
     name: string;
-    description: string;
+    lastName: string;
+    email: string;
     location: ILocation;
-    reward: number;
-    creationDate?:string;
-    steps?: IFavorStep[];
+    creationDate?: string;
 }
 
 //}

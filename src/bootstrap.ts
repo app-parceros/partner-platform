@@ -17,7 +17,7 @@ async function bootstrap() {
                 },
                 componentsScan: [
                     "${rootDir}/**/services/**\/*.ts",
-                    "${rootDir}/**/persistence/**\/*.ts"
+                    // "${rootDir}/**/persistence/**\/*.ts"
                 ],
                 statics: {
                     "/": Path.join(__dirname, "partner-platform.web")
