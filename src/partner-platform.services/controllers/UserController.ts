@@ -1,9 +1,9 @@
-import {BodyParams, Controller, PathParams, Post} from "@tsed/common";
+import { Controller, Get, PathParams, Post} from "@tsed/common";
 import {IPosition} from "../../partner-platform/models/Location";
 import {UserService} from "../../partner-platform/services/UserService";
 import {IUser} from "../../partner-platform/models/User";
-
 import {v4 as uuid} from 'uuid';
+import {Guid} from "../../partner-platform/models/Guid";
 
 @Controller("/user")
 export class UserController {
@@ -25,6 +25,10 @@ export class UserController {
         return await this._userService.updateUserPosition(uuid(), userPosition);
     }
 
+    @Get("/:userId")
+    async getUser(@PathParams("userId") userId: Guid): Promise<any> {
+        return await this._userService.getUserById(userId);
+    }
 }
 
 
