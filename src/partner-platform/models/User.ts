@@ -1,15 +1,20 @@
 //export namespace Common {
 import {Guid} from "./Guid";
 import {ILocation} from "./Location";
-import {IFavorStep} from "./FavorStep";
 
 export interface IUser {
     id: Guid;
+    userName:string;
     name: string;
     lastName: string;
     email: string;
+    phoneNumber: number;
     location: ILocation;
     creationDate?: string;
+}
+
+export interface IUserAuth extends IUser{
+    password: string;
 }
 
 //}

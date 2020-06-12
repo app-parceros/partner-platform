@@ -4,7 +4,8 @@ import {IPosition} from "../models/Location";
 import {Guid} from "../models/Guid";
 import {IUser} from "../models/User";
 import {ItemPersistence} from "../persistence/ItemPersistence";
-
+import {ITableEntity} from "../models/tableEntities/TableEntity";
+import {v4 as uuid} from 'uuid';
 @Injectable()
 @Scope('request')
 export class UserService implements OnDestroy {
@@ -17,7 +18,13 @@ export class UserService implements OnDestroy {
     }
 
     public async createUser(user: IUser) {
-        await this._userPersistence.saveItem<IUser>(user);
+        user.id =  uuid();
+        const userRow: ITableEntity = {
+            key: user.id.toString(),
+            rangeKey: user.email,
+            content: JSON.stringify(user)
+        }
+        await this._userPersistence.saveItem(userRow);
     }
 
     public async getUserById(userId: Guid): Promise<IUser> {

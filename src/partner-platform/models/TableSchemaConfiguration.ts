@@ -1,13 +1,13 @@
-export class DataManagerConfiguration {
-    consistentRead: boolean;
+export interface TableSchemaConfiguration {
+    consistentRead: boolean ;
     keyAttributeName: string;
     rangeKeyAttributeName: string;
     contentAttributeName: string;
-    dynamoDBClient: any;
+   // dynamoDBClient: any;
     tableName: any;
     indexName: string;
 
-    constructor(dynamoDBClient, tableName) {
+   /* constructor(dynamoDBClient, tableName) {
         this.consistentRead = false;
         this.keyAttributeName = "key";
         this.rangeKeyAttributeName = "rangeKey";
@@ -15,5 +15,5 @@ export class DataManagerConfiguration {
         this.dynamoDBClient = dynamoDBClient;
         this.tableName = tableName;
         this.indexName = "index";
-    }
+    }*/
 }

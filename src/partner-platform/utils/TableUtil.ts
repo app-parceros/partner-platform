@@ -1,8 +1,8 @@
-import {DataManagerConfiguration} from "../models/DataManagerConfiguration";
+import {TableSchemaConfiguration} from "../models/TableSchemaConfiguration";
 
 export class TableUtil {
 
-    public static getCreateTableRequest(config: DataManagerConfiguration) :any{
+    public static getTableSchema(config: TableSchemaConfiguration) :any{
         return {
             TableName: config.tableName,
             ProvisionedThroughput: {
@@ -21,7 +21,9 @@ export class TableUtil {
             ],
             AttributeDefinitions: [
                 {AttributeName: config.keyAttributeName, AttributeType: 'S'},
-                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'}
+                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'},
+                {AttributeName: 'userName', AttributeType: 'S'},
+                {AttributeName: 'timestamp', AttributeType: 'S'}
             ],
             LocalSecondaryIndexes: [
                 {
@@ -34,6 +36,18 @@ export class TableUtil {
                         {
                             KeyType: 'RANGE',
                             AttributeName: config.rangeKeyAttributeName
+                        }
+                    ],
+                    Projection: {
+                        ProjectionType: 'ALL'
+                    }
+                },
+                {
+                    IndexName: 'ByUserName',
+                    KeySchema: [
+                        {
+                            KeyType: 'RANGE',
+                            AttributeName: 'userName'
                         }
                     ],
                     Projection: {
