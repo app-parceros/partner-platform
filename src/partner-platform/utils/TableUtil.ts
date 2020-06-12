@@ -21,9 +21,7 @@ export class TableUtil {
             ],
             AttributeDefinitions: [
                 {AttributeName: config.keyAttributeName, AttributeType: 'S'},
-                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'},
-                {AttributeName: 'userName', AttributeType: 'S'},
-                {AttributeName: 'timestamp', AttributeType: 'S'}
+                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'}
             ],
             LocalSecondaryIndexes: [
                 {
@@ -36,18 +34,6 @@ export class TableUtil {
                         {
                             KeyType: 'RANGE',
                             AttributeName: config.rangeKeyAttributeName
-                        }
-                    ],
-                    Projection: {
-                        ProjectionType: 'ALL'
-                    }
-                },
-                {
-                    IndexName: 'ByUserName',
-                    KeySchema: [
-                        {
-                            KeyType: 'RANGE',
-                            AttributeName: 'userName'
                         }
                     ],
                     Projection: {

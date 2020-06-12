@@ -1,14 +1,49 @@
-import {GlobalAcceptMimesMiddleware, Module, ServerLoader} from "@tsed/common";
+import {
+    Configuration,
+    GlobalAcceptMimesMiddleware,
+    Inject,
+    PlatformApplication
+} from "@tsed/common";
 import * as http from "http";
 import {configuration} from "./partner-platform/config/FirebaseConfig";
+import Path from "path";
+import "@tsed/swagger";
 
+const PORT = process.env.PORT || 4200;
 
-@Module({})
-export class Server extends ServerLoader {
+@Configuration(
+    {
+        rootDir: Path.resolve(__dirname),
+        mount: {
+            "/api": ["${rootDir}/**/controllers/**\/*.ts",
+                // ResourceController // support manual import
+            ]
+        },
+        componentsScan: [
+            "${rootDir}/**/services/**\/*.ts",
+            // "${rootDir}/**/persistence/**\/*.ts",
+            "${rootDir}/**/middlewares/**\/*.ts",
+        ],
+        statics: {
+            "/": Path.join(__dirname, "partner-platform.web")
+        },
+        acceptMimes: ["application/json", "multipart/form-data"],
+        port: PORT,
+        swagger: [
+            {
+                path: "/api-docs"
+            }
+        ]
+    }
+)
+export class Server {
     /**
      * This method lets you configure the middleware required for your application to work.
      * @returns {Server}
      */
+    @Inject()
+    app: PlatformApplication;
+
     public $beforeRoutesInit(): void | Promise<any> {
         const //cookieParser = require('cookie-parser'),
             bodyParser = require('body-parser'),
@@ -24,7 +59,7 @@ export class Server extends ServerLoader {
             }
         }
 
-        this
+        this.app
             .use(GlobalAcceptMimesMiddleware)
             // .use(cookieParser())
             //.use(compress({}))

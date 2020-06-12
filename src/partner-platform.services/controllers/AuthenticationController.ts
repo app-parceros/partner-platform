@@ -10,16 +10,16 @@ export class AuthenticationController {
         private readonly authenticationService: AuthenticationService) {
     }
 
-    @Post("/user")
-    async createUserRegister(request: Express.Request, response: Express.Response) {
-        const user: IUserAuth = request['body'];
-        return await this.authenticationService.createUser(user);
+    @Post("/phone")
+    async registerUserPhone(request: Express.Request, response: Express.Response) {
+        const register : {phone: number} = request['body'];
+        return await this.authenticationService.registerUserPhone(register.phone);
     }
 
     @Post("/signIn")
     async signIn(request: Express.Request, response: Express.Response) {
-        const user: IUserAuth = request['body'];
-        return await this.authenticationService.signIn(user);
+        const credentials: { phone: number, hashCode: string } = request['body'];
+        return await this.authenticationService.signIn(credentials.phone, credentials.hashCode);
     }
 
 

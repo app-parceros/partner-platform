@@ -1,33 +1,12 @@
-import {$log, ServerLoader} from "@tsed/common";
+import {$log} from "@tsed/common";
+import {PlatformExpress} from "@tsed/platform-express"; // import swagger Ts.ED module
 import {Server} from "./Server";
-import * as Path from "path";
 
 async function bootstrap() {
     try {
         $log.debug("Start server...");
-        const PORT = process.env.PORT || 4200;
-
-        const server = await ServerLoader.bootstrap(Server,
-            {
-                rootDir: Path.resolve(__dirname),
-                mount: {
-                    "/api": ["${rootDir}/**/controllers/**\/*.ts",
-                        // ResourceController // support manual import
-                    ]
-                },
-                componentsScan: [
-                    "${rootDir}/**/services/**\/*.ts",
-                    // "${rootDir}/**/persistence/**\/*.ts",
-                    "${rootDir}/**/middlewares/**\/*.ts",
-                ],
-                statics: {
-                    "/": Path.join(__dirname, "partner-platform.web")
-                },
-                acceptMimes: ["application/json", "multipart/form-data"],
-                port: PORT,
-            });
-
-        await server.listen();
+        const platform = await PlatformExpress.bootstrap(Server, {});
+        await platform.listen();
         $log.debug("Server initialized");
     } catch (er) {
         $log.error(er);

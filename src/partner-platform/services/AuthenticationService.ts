@@ -4,6 +4,9 @@ import {IUser, IUserAuth} from "../models/User";
 import {configuration as authConfig} from "../config/AuthTokenConfig";
 import {IUserEntity} from "../models/tableEntities/UserEntity";
 import {v4 as uuid} from 'uuid';
+import {ITableEntity} from "../models/tableEntities/TableEntity";
+import {Unauthorized} from "@tsed/exceptions";
+
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -16,9 +19,25 @@ export class AuthenticationService implements OnDestroy {
         this._userPersistence = new ItemPersistence('UserAuth');
     }
 
+    async registerUserPhone(phone: number) {
+        const code = AuthenticationService.getRandomString(6);
+        const user: Partial<IUserAuth> = {
+            id: uuid(),
+            phoneNumber: phone,
+            password: await bcrypt.hash(code, 10)
+        };
+        const userRow: ITableEntity = {
+            key: user.phoneNumber.toString(),
+            rangeKey: user.id.toString(),
+            content: JSON.stringify(user)
+        }
+        AuthenticationService.sendCodeToPhone(code);
+        return this._userPersistence.saveItem(userRow);
+    }
+
     async createUser(user: IUserAuth) {
         user.password = await bcrypt.hash(user.password, 10);
-        user.id =  uuid();
+        user.id = uuid();
         const userRow: IUserEntity = {
             key: user.id.toString(),
             rangeKey: user.id.toString(),
@@ -29,26 +48,46 @@ export class AuthenticationService implements OnDestroy {
         return this._userPersistence.saveItem(userRow); // Configura para que la llave sea el email o el userName
     }
 
-    async signIn(userCredentials: IUserAuth) {
-        // let user = await this._userPersistence.getItemByKey<IUser>(userCredentials.userName);
-
-        let   user = await this._userPersistence.getItemByColumn<IUser>('userName',userCredentials.userName);
-
+    async signIn(phone: number, hashCode: string) {
+        let user = await this._userPersistence.getItemByKey<IUserAuth>(phone.toString());
         if (!user) {
-            user = await this._userPersistence.getItemByColumn('email',userCredentials.email);
+            console.log('Wrong code!!');
+            return;
         }
-        if(user){
-            const authResult = await bcrypt.compare(userCredentials.password, 10);
-            if (authResult) {
+        if (user) {
+            const authResult = await bcrypt.compare(hashCode, user.password);
+            if (!authResult) {
                 console.log('Authentication failed');
-                return;
+                throw new Unauthorized("Unauthorized");
             }
-            return jwt.sign(
-                {email: user.email, userId: user.id},
+            const token = jwt.sign(
+                {phone: user.phoneNumber, userId: user.id},
                 authConfig.jwtSecret,
                 {expiresIn: authConfig.jwtExpire}
             );
+            return {
+                token: token,
+                userId: user.id
+            }
         }
+    }
+
+
+    private static sendCodeToPhone(code: string) {
+        // Todo:  create service to send to SNS
+        console.log('*********************************');
+        console.log(`********Code : ${code}  *********`);
+        console.log('*********************************');
+    }
+
+    private static getRandomString(len): string {
+        const source = '1234567890';
+        let ans = '';
+        for (let i = len; i > 0; i--) {
+            ans +=
+                source[Math.floor(Math.random() * source.length)];
+        }
+        return ans;
     }
 
     $onDestroy() {
