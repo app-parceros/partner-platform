@@ -5,7 +5,7 @@ import * as Path from "path";
 async function bootstrap() {
     try {
         $log.debug("Start server...");
-        const PORT = process.env.PORT || 3000;
+        const PORT = process.env.PORT || 4200;
 
         const server = await ServerLoader.bootstrap(Server,
             {
@@ -17,7 +17,8 @@ async function bootstrap() {
                 },
                 componentsScan: [
                     "${rootDir}/**/services/**\/*.ts",
-                    // "${rootDir}/**/persistence/**\/*.ts"
+                    // "${rootDir}/**/persistence/**\/*.ts",
+                    "${rootDir}/**/middlewares/**\/*.ts",
                 ],
                 statics: {
                     "/": Path.join(__dirname, "partner-platform.web")

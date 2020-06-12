@@ -1,17 +1,25 @@
-import {v4 as uuid} from 'uuid';
 import {TableUtil} from "../utils/TableUtil";
-import {configuration} from "../config/AWSConfig";
-import {DataManagerConfiguration} from "../models/DataManagerConfiguration";
+import {configuration as AWSConfig} from "../config/AWSConfig";
+import {TableSchemaConfiguration} from "../models/TableSchemaConfiguration";
 import {DynamoDB} from "aws-sdk";
 import {PutItemInput} from "aws-sdk/clients/dynamodb";
 import {Guid} from "../models/Guid";
+import {ITableEntity} from "../models/tableEntities/TableEntity";
 
 const AWS = require('aws-sdk');
 
 
 export class ItemPersistence {
     private dynamoDB;
-    private dataManagerConfiguration: DataManagerConfiguration;
+    private tableSchemaConfiguration: TableSchemaConfiguration = {
+        consistentRead: false,
+        keyAttributeName: "key",
+        rangeKeyAttributeName: "rangeKey",
+        contentAttributeName: "content",
+        // dynamoDBClient : dynamoDBClient;
+        tableName: "NewTableDefaultName",
+        indexName: "index"
+    };
 
     constructor(tableName) {
         this.configureService(tableName).then();
@@ -19,20 +27,19 @@ export class ItemPersistence {
 
     public async configureService(tableName: string) {
         console.log('-----------Configuring  ', tableName);
-        AWS.config.update(configuration);
+        AWS.config.update(AWSConfig);
         this.dynamoDB = new AWS.DynamoDB();
-        this.dataManagerConfiguration = new DataManagerConfiguration(this.dynamoDB, `${tableName}`);
-
         if (tableName) {
+            this.tableSchemaConfiguration.tableName = `${tableName}`;
             await this.setupTable();
         }
     }
 
     setupTable = async () => {
         const self = this;
-        const createTableInput = TableUtil.getCreateTableRequest(this.dataManagerConfiguration);
+        const createTableInput = TableUtil.getTableSchema(this.tableSchemaConfiguration);
         createTableInput.ProvisionedThroughput.ReadCapacityUnits = 5;
-        const existTable = await self.getTable(self.dataManagerConfiguration.tableName);
+        const existTable = await self.getTable(self.tableSchemaConfiguration.tableName);
         if (!existTable) {
             await this.dynamoDB
                 .createTable(createTableInput)
@@ -54,17 +61,26 @@ export class ItemPersistence {
         });
     }
 
-    saveItem = async <T>(resource: T) => {
-        const id = uuid();
+    saveItem = async (resource: ITableEntity) => {
         const creationDate = new Date();
+        const keyAttributeName = this.tableSchemaConfiguration.keyAttributeName;
+        const rangeKeyAttributeName = this.tableSchemaConfiguration.rangeKeyAttributeName;
         const itemInput: PutItemInput = {
-            TableName: this.dataManagerConfiguration.tableName,
+            TableName: this.tableSchemaConfiguration.tableName,
             Item: {
-                [this.dataManagerConfiguration.keyAttributeName]: {S: id.toString()},
-                [this.dataManagerConfiguration.rangeKeyAttributeName]: {S: id.toString()},
-                content: {S: JSON.stringify({id, creationDate, ...resource})}
+                [keyAttributeName]: {S: resource.key},
+                [rangeKeyAttributeName]: {S: resource.rangeKey},
+                content: {S: resource.content},
+                timestamp: {S: creationDate.toString()}
             }
         };
+        // Additional columns as string
+        const extraColumns = Object.keys(resource).filter(c => ![keyAttributeName, rangeKeyAttributeName, 'content', 'timestamp'].includes(c))
+        for (let extraColumnKey of extraColumns) {
+            let extraColumnValue = resource[extraColumnKey];
+            itemInput.Item[extraColumnKey] = {S: extraColumnValue.toString()}
+        }
+
         return this.dynamoDB
             .putItem(itemInput)
             .promise();
@@ -78,27 +94,44 @@ export class ItemPersistence {
         return null;
     }
 
-    private async query(queryInput: DynamoDB.QueryInput | undefined, key: string): Promise<DynamoDB.QueryOutput[]> {
+
+    public async getItemByColumn<T>(columnName: string, columnValue: string): Promise<T> {
+        const query: DynamoDB.QueryInput = {
+            TableName: this.tableSchemaConfiguration.tableName,
+            IndexName: "ByUserName",
+            KeyConditionExpression: `${columnName} = :a`,
+            ExpressionAttributeValues: {
+                ":a": {S: columnValue}
+            }
+        }
+        const result: DynamoDB.QueryOutput[] = await this.dynamoDB.query(query).promise();
+        if (result && result[0]?.Items[0]?.content?.S) {
+            return JSON.parse(result[0].Items[0].content.S)
+        }
+        return null;
+    }
+
+    private async query(queryInput: DynamoDB.QueryInput | undefined, keyValue: string): Promise<DynamoDB.QueryOutput[]> {
         const queryOutputs: DynamoDB.QueryOutput[] = [];
 
         const nextQuery = async (lastEvaluatedKey: DynamoDB.Key = null) => {
             const keyConditions: { [key: string]: DynamoDB.Condition } = {};
 
-            keyConditions[this.dataManagerConfiguration.keyAttributeName] = {
+            keyConditions[this.tableSchemaConfiguration.keyAttributeName] = {
                 ComparisonOperator: "EQ",
-                AttributeValueList: [{S: key}]
+                AttributeValueList: [{S: keyValue}]
             };
 
             const defaults = {
-                TableName: this.dataManagerConfiguration.tableName,
+                TableName: this.tableSchemaConfiguration.tableName,
                 KeyConditions: keyConditions,
-                IndexName: this.dataManagerConfiguration.indexName,
-                ConsistentRead: this.dataManagerConfiguration.consistentRead,
+                IndexName: this.tableSchemaConfiguration.indexName,
+                ConsistentRead: this.tableSchemaConfiguration.consistentRead,
                 ReturnConsumedCapacity: "TOTAL",
                 ExclusiveStartKey: lastEvaluatedKey
             };
-
-            const queryOutput = await this.dataManagerConfiguration.dynamoDBClient.query({...defaults, ...queryInput}).promise();
+            const query = {...defaults, ...queryInput};
+            const queryOutput = await this.dynamoDB.query(query).promise();
             queryOutputs.push(queryOutput);
             if (queryOutput.LastEvaluatedKey) {
                 return nextQuery(queryOutput.LastEvaluatedKey);
