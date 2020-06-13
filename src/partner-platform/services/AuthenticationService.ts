@@ -6,6 +6,7 @@ import {IUserEntity} from "../models/tableEntities/UserEntity";
 import {v4 as uuid} from 'uuid';
 import {ITableEntity} from "../models/tableEntities/TableEntity";
 import {Unauthorized} from "@tsed/exceptions";
+import {SMSService} from "./SMSService";
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -15,11 +16,12 @@ const bcrypt = require("bcrypt");
 export class AuthenticationService implements OnDestroy {
     private readonly _userPersistence: ItemPersistence;
 
-    constructor() {
+    constructor(private readonly _smsService: SMSService) {
         this._userPersistence = new ItemPersistence('UserAuth');
+
     }
 
-    async registerUserPhone(phone: number) {
+    async registerUserPhone(phone: string) {
         const code = AuthenticationService.getRandomString(6);
         const user: Partial<IUserAuth> = {
             id: uuid(),
@@ -31,7 +33,7 @@ export class AuthenticationService implements OnDestroy {
             rangeKey: user.id.toString(),
             content: JSON.stringify(user)
         }
-        AuthenticationService.sendCodeToPhone(code);
+        this.sendCodeToPhone(code, phone.toString());
         return this._userPersistence.saveItem(userRow);
     }
 
@@ -73,11 +75,16 @@ export class AuthenticationService implements OnDestroy {
     }
 
 
-    private static sendCodeToPhone(code: string) {
+    private sendCodeToPhone(code: string, phoneNumber: string) {
         // Todo:  create service to send to SNS
         console.log('*********************************');
-        console.log(`********Code : ${code}  *********`);
+        console.log(`******** Code : ${code}   ********`);
         console.log('*********************************');
+        //const phoneRegex = /^[2-9]\d{2}[2-9]\d{2}\d{4}$/;
+        //const isValid = phoneRegex.test(phoneNumber);
+        //if (isValid) {
+            this._smsService.sendNotificationToUser(`Tu código parceros: ${code}`, phoneNumber);
+        //}
     }
 
     private static getRandomString(len): string {

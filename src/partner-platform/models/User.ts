@@ -8,7 +8,7 @@ export interface IUser {
     name: string;
     lastName: string;
     email: string;
-    phoneNumber: number;
+    phoneNumber: string;
     location: ILocation;
     creationDate?: string;
 }

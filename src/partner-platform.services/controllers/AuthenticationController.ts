@@ -12,7 +12,7 @@ export class AuthenticationController {
 
     @Post("/phone")
     async registerUserPhone(request: Express.Request, response: Express.Response) {
-        const register : {phone: number} = request['body'];
+        const register : {phone: string} = request['body'];
         return await this.authenticationService.registerUserPhone(register.phone);
     }
 
