@@ -33,7 +33,7 @@ export class UserService implements OnDestroy {
     }
 
     public async registerNotificationToken(userId: Guid, token: PushNotificationToken) {
-        const result = await this._userPersistence.getItemByKey<IUser>(userId);
+        const result = await this._userPersistence.getItemByRowId<IUser>(userId.toString());
         if (!result) {
             return;
         }

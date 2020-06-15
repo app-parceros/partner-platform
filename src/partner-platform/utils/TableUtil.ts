@@ -52,7 +52,7 @@ export class TableUtil {
                         }
                     ],
                     Projection: {
-                        ProjectionType: 'KEYS_ONLY'
+                        ProjectionType: 'ALL'
                     },
                     ProvisionedThroughput: {
                         ReadCapacityUnits: 10,
