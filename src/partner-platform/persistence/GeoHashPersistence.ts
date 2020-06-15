@@ -1,7 +1,7 @@
 import {v4 as uuid} from 'uuid';
 import {configuration} from "../config/AWSConfig";
 import {IPosition} from "../models/Location";
-import {PutPointInput} from "dynamodb-geo/dist/types";
+import {DeletePointInput, PutPointInput, UpdatePointInput} from "dynamodb-geo/dist/types";
 import {Guid} from "../models/Guid";
 
 const ddbGeo = require('dynamodb-geo');
@@ -85,24 +85,47 @@ export class GeoHashPersistence {
     }
 
 
+    async deleteRegister<T>(id: Guid, position: IPosition) {
+        const pointToDelete: DeletePointInput = {
+            RangeKeyValue: {S: id.toString()},
+            GeoPoint: {
+                latitude: position.lat,
+                longitude: position.lng
+            }
+        };
+        return await this.geoTableManager
+            .deletePoint(pointToDelete)
+            .promise()
+    }
+
+
     async updateRegister<T>(id: Guid, position: IPosition, resource) {
-        const creationDate = new Date();
-        const pointInput: PutPointInput = {
+        await this.deleteRegister(id, position);
+        return await this.saveRegister(position, resource)
+    }
+
+    async updateRegisterContent<T>(id: Guid, position: IPosition, resource) {
+        const modificationDate = new Date();
+        const pointInput: Partial<UpdatePointInput> = {
             RangeKeyValue: {S: id.toString()},
             GeoPoint: {
                 latitude: position.lat,
                 longitude: position.lng
             },
-            PutItemInput: {
-                Item: {
+            UpdateItemInput: {
+                TableName: this.geoDataManagerConfiguration.tableName,
+                Key: {},
+                AttributeUpdates: {
                     content: {
-                        S: JSON.stringify({
-                            id,
-                            ...resource,
-                            creationDate
-                        })
+                        Action: "PUT",
+                        Value: {
+                            S: JSON.stringify({
+                                id,
+                                ...resource,
+                                modificationDate
+                            })
+                        }
                     }
-                    // anotherColumn: {S: 'columnValue'}
                 }
             }
         };

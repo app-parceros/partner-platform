@@ -49,9 +49,11 @@ export class UserService implements OnDestroy {
     }
 
     public async updateUserPosition(userId: Guid, position: IPosition) {
-        await this._geoHashPersistence.saveRegister<Partial<IUser>>(position, {
-            name: 'test user'
-        });
+        const result = await this._userPersistence.getItemByRowId<IUser>(userId.toString());
+        if (!result) {
+            return;
+        }
+        await this._geoHashPersistence.updateRegister<Partial<IUser>>(result.rowId, position, result.content);
     }
 
 

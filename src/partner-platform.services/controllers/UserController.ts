@@ -2,11 +2,10 @@ import {BodyParams, Controller, Get, PathParams, Post, UseBefore} from "@tsed/co
 import {IPosition} from "../../partner-platform/models/Location";
 import {UserService} from "../../partner-platform/services/UserService";
 import {IUser} from "../../partner-platform/models/User";
-import {v4 as uuid} from 'uuid';
 import {Guid} from "../../partner-platform/models/Guid";
 import {AuthenticationMiddleware} from "../../partner-platform/middlewares/AuthenticationMiddleware";
 import {PushNotificationToken} from "../../partner-platform/models/PushNotificationToken";
-import {Description, Returns, Summary} from "@tsed/swagger";
+import {Description, Summary} from "@tsed/swagger";
 
 @Controller("/user")
 export class UserController {
@@ -22,10 +21,12 @@ export class UserController {
     }
 
     @Post("/:userId/position")
-    async updateUserPosition(request: Express.Request, response: Express.Response) {
-        const userPosition: IPosition = request['body'];
-        console.log('------updateUserPosition', userPosition);
-        return await this._userService.updateUserPosition(uuid(), userPosition);
+    @Summary("Register position for an user")
+    @Description("Associate position with the user")
+    async updateUserPosition(
+        @PathParams("userId") userId: Guid,
+        @BodyParams() position: IPosition) {
+        return await this._userService.updateUserPosition(userId, position);
     }
 
 
