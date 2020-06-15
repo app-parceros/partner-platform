@@ -13,7 +13,7 @@ import {GeoHashUserPersistence, UserPersistence} from "../persistence/Configurat
 @Scope('request')
 export class UserService implements OnDestroy {
 
-    constructor(@Inject(GeoHashUserPersistence) private _geoHashPersistence: GeoHashPersistence,
+    constructor(@Inject(GeoHashUserPersistence) private _geoHashUserPersistence: GeoHashPersistence,
                 @Inject(UserPersistence) private _userPersistence: ItemPersistence) {
     }
 
@@ -53,7 +53,7 @@ export class UserService implements OnDestroy {
         if (!result) {
             return;
         }
-        await this._geoHashPersistence.updateRegister<Partial<IUser>>(result.rowId, position, result.content);
+        await this._geoHashUserPersistence.updateRegister<Partial<IUser>>(result.rowId, position, result.content);
     }
 
 

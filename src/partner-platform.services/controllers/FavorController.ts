@@ -1,7 +1,10 @@
-import {Controller, Get, Post, QueryParams} from "@tsed/common";
+import {BodyParams, Controller, Get, PathParams, Post, QueryParams} from "@tsed/common";
 import {FavorService} from "../../partner-platform/services/FavorService";
 import {IFavor} from "../../partner-platform/models/Favor";
 import {ResultSet} from "../../partner-platform/models/ResultSet";
+import {Description, Summary} from "@tsed/swagger";
+import {Guid} from "../../partner-platform/models/Guid";
+import {PushNotificationToken} from "../../partner-platform/models/PushNotificationToken";
 
 @Controller("/favor")
 export class NotificationController {
@@ -22,8 +25,10 @@ export class NotificationController {
     }
 
     @Post("/")
-    async createFavor(request: Express.Request, response: Express.Response) {
-        const favor: IFavor = request['body'];
+    @Summary("Create a favor")
+    @Description("Create a favor associated with a position")
+    async createFavor(
+        @BodyParams() favor: IFavor) {
         return await this._favorService.createFavor(favor);
     }
 
