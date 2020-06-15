@@ -46,7 +46,9 @@ export class FavorService implements OnDestroy {
     public async notifyNearestProviders(favor: IFavor, radius: number = 1000) {
         const nearest = await this._geoHashUserPersistence.getNearestRegisters<IUser>(favor.position, radius);
         for (const user of nearest) {
-            await this._notificationService.sendNotificationToUser(user.notificationToken, "my mesdddsage");
+            if (user.notificationToken && user.notificationToken !== "") {
+                await this._notificationService.sendNotificationToUser(user.notificationToken, `Hay trabajo cerca: ${favor.description}`);
+            }
         }
     }
 
