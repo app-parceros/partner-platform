@@ -2,7 +2,7 @@ import {TableSchemaConfiguration} from "../models/TableSchemaConfiguration";
 
 export class TableUtil {
 
-    public static getTableSchema(config: TableSchemaConfiguration) :any{
+    public static getTableSchema(config: TableSchemaConfiguration): any {
         return {
             TableName: config.tableName,
             ProvisionedThroughput: {
@@ -21,7 +21,8 @@ export class TableUtil {
             ],
             AttributeDefinitions: [
                 {AttributeName: config.keyAttributeName, AttributeType: 'S'},
-                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'}
+                {AttributeName: config.rangeKeyAttributeName, AttributeType: 'S'},
+                {AttributeName: config.rowIdAttributeName, AttributeType: 'S'}
             ],
             LocalSecondaryIndexes: [
                 {
@@ -38,6 +39,24 @@ export class TableUtil {
                     ],
                     Projection: {
                         ProjectionType: 'ALL'
+                    }
+                }
+            ],
+            GlobalSecondaryIndexes: [
+                {
+                    IndexName: config.gsiIndexName,
+                    KeySchema: [
+                        {
+                            AttributeName: config.rowIdAttributeName,
+                            KeyType: 'HASH',
+                        }
+                    ],
+                    Projection: {
+                        ProjectionType: 'KEYS_ONLY'
+                    },
+                    ProvisionedThroughput: {
+                        ReadCapacityUnits: 10,
+                        WriteCapacityUnits: 10
                     }
                 }
             ]

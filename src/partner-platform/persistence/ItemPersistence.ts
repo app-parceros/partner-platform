@@ -2,9 +2,9 @@ import {TableUtil} from "../utils/TableUtil";
 import {configuration as AWSConfig} from "../config/AWSConfig";
 import {TableSchemaConfiguration} from "../models/TableSchemaConfiguration";
 import {DynamoDB} from "aws-sdk";
-import {PutItemInput} from "aws-sdk/clients/dynamodb";
+import {PutItemInput, UpdateItemInput} from "aws-sdk/clients/dynamodb";
 import {Guid} from "../models/Guid";
-import {ITableEntity} from "../models/tableEntities/TableEntity";
+import {ITableEntity, ITableEntityResult} from "../models/tableEntities/TableEntity";
 
 const AWS = require('aws-sdk');
 
@@ -14,11 +14,13 @@ export class ItemPersistence {
     private tableSchemaConfiguration: TableSchemaConfiguration = {
         consistentRead: false,
         keyAttributeName: "key",
+        rowIdAttributeName: "rowId",
         rangeKeyAttributeName: "rangeKey",
         contentAttributeName: "content",
         // dynamoDBClient : dynamoDBClient;
         tableName: "NewTableDefaultName",
-        indexName: "index"
+        indexName: "index",
+        gsiIndexName: "rowIdValue"
     };
 
     constructor(tableName) {
@@ -62,16 +64,19 @@ export class ItemPersistence {
     }
 
     saveItem = async (resource: ITableEntity) => {
-        const creationDate = new Date();
+        const timestamp = +new Date();
+        const modificationDate = new Date();
         const keyAttributeName = this.tableSchemaConfiguration.keyAttributeName;
+        const rowIdAttributeName = this.tableSchemaConfiguration.rowIdAttributeName;
         const rangeKeyAttributeName = this.tableSchemaConfiguration.rangeKeyAttributeName;
         const itemInput: PutItemInput = {
             TableName: this.tableSchemaConfiguration.tableName,
             Item: {
                 [keyAttributeName]: {S: resource.key},
-                [rangeKeyAttributeName]: {S: resource.rangeKey},
+                [rowIdAttributeName]: {S: resource.rowId},
+                [rangeKeyAttributeName]: {S: resource.rangeKey || timestamp.toString()},
                 content: {S: resource.content},
-                timestamp: {S: creationDate.toString()}
+                modificationDate: {S: modificationDate.toString()}
             }
         };
         // Additional columns as string
@@ -86,27 +91,72 @@ export class ItemPersistence {
             .promise();
     }
 
-    public async getItemByKey<T>(key: Guid): Promise<T> {
+
+    updateItem = async (resource: ITableEntity) => {
+        const modificationDate = new Date();
+        const keyAttributeName = this.tableSchemaConfiguration.keyAttributeName;
+        const rangeKeyAttributeName = this.tableSchemaConfiguration.rangeKeyAttributeName;
+        const itemInput: UpdateItemInput = {
+            TableName: this.tableSchemaConfiguration.tableName,
+            Key: {
+                [keyAttributeName]: {S: resource.key},
+                [rangeKeyAttributeName]: {S: resource.rangeKey}
+            },
+            UpdateExpression: "set content = :c, modificationDate = :t",
+            ExpressionAttributeValues: {
+                ":c": {S: resource.content},
+                ":t": {S: modificationDate.toString()},
+            },
+            ReturnValues: "UPDATED_NEW"
+        };
+        return this.dynamoDB
+            .updateItem(itemInput)
+            .promise();
+    }
+
+    public async getItemByKey<T>(key: Guid): Promise<ITableEntityResult<T>> {
         const result: DynamoDB.QueryOutput[] = await this.query(null, key.toString());
         if (result && result[0]?.Items[0]?.content?.S) {
-            return JSON.parse(result[0].Items[0].content.S)
+            const key = result[0].Items[0].key.S;
+            const rangeKey = result[0].Items[0].rangeKey.S;
+            const rowId = result[0].Items[0].rowId.S;
+            const content = JSON.parse(result[0].Items[0].content.S);
+
+            return {
+                key: key,
+                rangeKey: rangeKey,
+                rowId: rowId,
+                content: content
+            };
         }
         return null;
     }
 
-
-    public async getItemByColumn<T>(columnName: string, columnValue: string): Promise<T> {
+    public async getItemByRowId<T>(rowId: string): Promise<ITableEntityResult<T>> {
+        const rowIdAttributeName = this.tableSchemaConfiguration.rowIdAttributeName;
         const query: DynamoDB.QueryInput = {
             TableName: this.tableSchemaConfiguration.tableName,
-            IndexName: "ByUserName",
-            KeyConditionExpression: `${columnName} = :a`,
+            IndexName: this.tableSchemaConfiguration.gsiIndexName,
+            KeyConditionExpression: `#rk = :a`,
+            ExpressionAttributeNames: {
+                "#rk": rowIdAttributeName
+            },
             ExpressionAttributeValues: {
-                ":a": {S: columnValue}
+                ":a": {S: rowId}
             }
         }
-        const result: DynamoDB.QueryOutput[] = await this.dynamoDB.query(query).promise();
-        if (result && result[0]?.Items[0]?.content?.S) {
-            return JSON.parse(result[0].Items[0].content.S)
+        const result: any = await this.dynamoDB.query(query).promise();
+        if (result && result.Items[0]?.content?.S) {
+            const key = result.Items[0].key.S;
+            const rangeKey = result.Items[0].rangeKey.S;
+            const rowId = result.Items[0].rowId.S;
+            const content = JSON.parse(result.Items[0].content.S);
+            return {
+                key: key,
+                rangeKey: rangeKey,
+                rowId: rowId,
+                content: content
+            };
         }
         return null;
     }
