@@ -67,7 +67,7 @@ export class UserService implements OnDestroy {
             key: result.key,
             rangeKey: result.rangeKey,
             rowId: userId.toString(),
-            content: JSON.stringify({...savedUser, user})
+            content: JSON.stringify({...savedUser, ...user})
         });
     }
 
