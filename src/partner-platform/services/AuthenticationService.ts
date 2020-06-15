@@ -21,18 +21,29 @@ export class AuthenticationService implements OnDestroy {
 
     async registerUserPhone(phone: string) {
         const code = AuthenticationService.getRandomString(6);
-        const user: Partial<IUserAuth> = {
-            id: uuid(),
+        this.sendCodeToPhone(code, phone.toString());
+        const userInitialData: Partial<IUserAuth> = {
             phoneNumber: phone,
             password: await bcrypt.hash(code, 10)
         };
-        const userRow: ITableEntity = {
-            key: user.phoneNumber.toString(),
-            rowId: user.id.toString(),
-            content: JSON.stringify(user)
+        const result = await this._userPersistence.getItemByKey<IUserAuth>(phone.toString());
+        if (!result) {
+            const newId = uuid().toString();
+            const userRow: ITableEntity = {
+                key: phone.toString(),
+                rowId: newId,
+                content: JSON.stringify({...userInitialData, id: newId})
+            }
+            return this._userPersistence.saveItem(userRow);
+        } else {
+            const registeredUser = result.content;
+            await this._userPersistence.updateItem({
+                key: result.key,
+                rangeKey: result.rangeKey,
+                rowId: registeredUser.id.toString(),
+                content: JSON.stringify({...userInitialData, id: registeredUser.id})
+            });
         }
-        this.sendCodeToPhone(code, phone.toString());
-        return this._userPersistence.saveItem(userRow);
     }
 
     async signIn(phone: number, hashCode: string) {

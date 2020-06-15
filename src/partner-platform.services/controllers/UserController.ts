@@ -1,4 +1,4 @@
-import {BodyParams, Controller, Get, PathParams, Post, UseBefore} from "@tsed/common";
+import {BodyParams, Controller, Get, PathParams, Post, Put, UseBefore} from "@tsed/common";
 import {IPosition} from "../../partner-platform/models/Location";
 import {UserService} from "../../partner-platform/services/UserService";
 import {IUser} from "../../partner-platform/models/User";
@@ -27,6 +27,15 @@ export class UserController {
         @PathParams("userId") userId: Guid,
         @BodyParams() position: IPosition) {
         return await this._userService.updateUserPosition(userId, position);
+    }
+
+    @Put("/:userId")
+    @Summary("Update profile for an user")
+    @Description("Associate profile data with the user")
+    // @UseBefore(AuthenticationMiddleware)
+    async updateProfile(@PathParams("userId") userId: Guid,
+                        @BodyParams() user: IUser): Promise<any> {
+        return await this._userService.updateProfile(userId, user);
     }
 
 

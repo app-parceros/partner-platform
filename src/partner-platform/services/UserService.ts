@@ -56,6 +56,21 @@ export class UserService implements OnDestroy {
         await this._geoHashUserPersistence.updateRegister<Partial<IUser>>(result.rowId, position, result.content);
     }
 
+    public async updateProfile(userId: Guid, user: IUser) {
+        const result = await this._userPersistence.getItemByRowId<IUser>(userId.toString());
+        if (!result) {
+            return;
+        }
+        const savedUser = result.content;
+
+        return await this._userPersistence.updateItem({
+            key: result.key,
+            rangeKey: result.rangeKey,
+            rowId: userId.toString(),
+            content: JSON.stringify({...savedUser, user})
+        });
+    }
+
 
     $onDestroy() {
         console.log('Service destroyed');
