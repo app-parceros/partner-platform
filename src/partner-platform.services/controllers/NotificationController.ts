@@ -18,7 +18,7 @@ export class NotificationController {
         const user = await this._userService.getUserById(userId);
         if (user && user.notificationToken) {
             await this._notificationService.sendNotificationToUser(
-                message.notificationToken,
+                user.notificationToken,
                 message.title || "Parcer@!",
                 message.content || "Esta es una prueba");
         }
