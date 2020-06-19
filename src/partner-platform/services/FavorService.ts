@@ -43,7 +43,7 @@ export class FavorService implements OnDestroy {
         return resultSet;
     }
 
-    public async notifyNearestProviders(favor: IFavor, radius: number = 1000) {
+    public async notifyNearestProviders(favor: IFavor, radius: number = 4000) {
         const nearest = await this._geoHashUserPersistence.getNearestRegisters<IUser>(favor.position, radius);
         for (const user of nearest) {
             if (user.notificationToken && user.notificationToken !== "") {
