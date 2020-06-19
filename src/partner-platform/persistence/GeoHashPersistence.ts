@@ -3,6 +3,7 @@ import {configuration} from "../config/AWSConfig";
 import {IPosition} from "../models/Location";
 import {DeletePointInput, PutPointInput, UpdatePointInput} from "dynamodb-geo/dist/types";
 import {Guid} from "../models/Guid";
+import {Exception} from "@tsed/exceptions";
 
 const ddbGeo = require('dynamodb-geo');
 const AWS = require('aws-sdk');
@@ -55,12 +56,12 @@ export class GeoHashPersistence {
         });
     }
 
-    saveRegister = async <T>(position: IPosition, resource: T) => {
+    saveRegister = async <T>(position: IPosition, resource: T, id?: Guid) => {
         const self = this;
-        const id = uuid();
+        const rowId = id || uuid();
         const creationDate = new Date();
         const pointInput: PutPointInput = {
-            RangeKeyValue: {S: id},
+            RangeKeyValue: {S: rowId},
             GeoPoint: {
                 latitude: position.lat,
                 longitude: position.lng
@@ -69,7 +70,7 @@ export class GeoHashPersistence {
                 Item: {
                     content: {
                         S: JSON.stringify({
-                            id,
+                            id: rowId,
                             ...resource,
                             creationDate
                         })
@@ -100,8 +101,12 @@ export class GeoHashPersistence {
 
 
     async updateRegister<T>(id: Guid, position: IPosition, resource) {
-        await this.deleteRegister(id, position);
-        return await this.saveRegister(position, resource)
+        try {
+            await this.deleteRegister(id, position);
+            return await this.saveRegister(position, resource, id)
+        } catch (e) {
+            throw new Exception(e);
+        }
     }
 
     async updateRegisterContent<T>(id: Guid, position: IPosition, resource) {
