@@ -15,11 +15,11 @@ export class NotificationService implements OnDestroy {
         });
     }
 
-    public sendNotificationToUser(registrationToken: string, message: string) {
+    public sendNotificationToUser(registrationToken: string, title: string, message: string) {
         console.log("sending message", message);
         const payload = {
             notification: {
-                title: "This is a Notification",
+                title: title,
                 body: message
             }
         };
@@ -44,7 +44,7 @@ export class NotificationService implements OnDestroy {
 
     async registerToken(pushNotificationToken: PushNotificationToken) {
         console.log('token', pushNotificationToken.value);
-        this.sendNotificationToUser(pushNotificationToken.value, "Te has registrado")
+        // todo:  complete this method
     }
 
     $onDestroy() {
