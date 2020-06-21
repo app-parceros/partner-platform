@@ -3,6 +3,8 @@ import {PushNotificationToken} from "../models/PushNotificationToken";
 
 const firebaseAdmin = require("firebase-admin");
 import {configuration} from "../config/FirebaseConfig";
+import admin from "firebase-admin";
+import MessagingPayload = admin.messaging.MessagingPayload;
 
 @Injectable()
 @Scope('request')
@@ -15,9 +17,14 @@ export class NotificationService implements OnDestroy {
         });
     }
 
-    public sendNotificationToUser(registrationToken: string, title: string, message: string) {
+    public sendNotificationToUser(registrationToken: string,
+                                  title: string,
+                                  message: string,
+                                  data?: { [key: string]: string }) {
         console.log("sending message", message);
-        const payload = {
+
+        const payload: MessagingPayload = {
+            data: data,
             notification: {
                 title: title,
                 body: message
