@@ -21,8 +21,8 @@ export class FavorService implements OnDestroy {
     }
 
     public async createFavor(favor: IFavor) {
-        await this._geoHashFavorPersistence.saveRegister<IFavor>(favor.position, favor);
-        await this.notifyNearestProviders(favor);
+        const registeredFavor = await this._geoHashFavorPersistence.saveRegister<IFavor>(favor.position, favor);
+        await this.notifyNearestProviders(registeredFavor);
     }
 
     public async getNearestFavors(position: IPosition, radius: number): Promise<ResultSet<IFavor>> {

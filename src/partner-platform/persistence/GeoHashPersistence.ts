@@ -79,10 +79,11 @@ export class GeoHashPersistence {
                 }
             }
         };
-        return await self.geoTableManager
+         await self.geoTableManager
             .putPoint(pointInput)
             //.batchWritePoints([pointInput])
             .promise()
+        return {...resource, id: rowId};
     }
 
 
