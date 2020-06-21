@@ -32,6 +32,12 @@ export class NotificationController {
         return await this._favorService.createFavor(favor);
     }
 
+
+    @Get("/:favorId")
+    async getFavorDetail(@PathParams("favorId") favorId: Guid): Promise<any> {
+        return await this._favorService.getFavorDetail(favorId);
+    }
+
 }
 
 
