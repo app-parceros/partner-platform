@@ -32,20 +32,20 @@ export class FavorService implements OnDestroy {
             creationDate: (new Date()).toString(),
             description: 'favor description',
             position: null,
-            name: 'Luis',
+            name: 'Daniel mock',
             reward: 4000,
             steps: [
                 {
                     description: 'step number one',
-                    position: {lat: 4.725758098247824, lng: -74.03076787201972}
+                    position: { "lat": 2.4990734,                "lng": -76.5603715}
                 },
                 {
                     description: 'step number two',
-                    position: {lat: 4.735758098247834, lng: -74.04076787201982}
+                    position: { "lat": 2.4990735,                "lng": -76.5603716}
                 },
                 {
                     description: 'step number three',
-                    position: {lat: 4.745758098247844, lng: -74.05076787201992}
+                    position: { "lat": 2.4990736,                "lng": -76.5603717}
                 }
             ]
         };
