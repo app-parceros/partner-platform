@@ -37,15 +37,15 @@ export class FavorService implements OnDestroy {
             steps: [
                 {
                     description: 'step number one',
-                    position: { "lat": 2.4990734,                "lng": -76.5603715}
+                    position: { "lat": 2.4960734,                "lng": -76.4003715}
                 },
                 {
                     description: 'step number two',
-                    position: { "lat": 2.4990735,                "lng": -76.5603716}
+                    position: { "lat": 2.4990735,                "lng": -76.5003716}
                 },
                 {
                     description: 'step number three',
-                    position: { "lat": 2.4990736,                "lng": -76.5603717}
+                    position: { "lat": 2.49120736,                "lng": -76.6003717}
                 }
             ]
         };
